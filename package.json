@@ -1,0 +1,13 @@
+{
+  "name": "normas-converter",
+  "version": "1.0.0",
+  "description": "Converts PDF and DOCX normas files to Markdown for use in Copilot Spaces",
+  "scripts": {
+    "convert:sources": "node scripts/convert.js",
+    "convert:sources:recursive": "node scripts/convert.js --recursive"
+  },
+  "dependencies": {
+    "mammoth": "^1.8.0",
+    "pdf-parse": "^1.1.1"
+  }
+}
