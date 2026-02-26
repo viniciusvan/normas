@@ -1,28 +1,14 @@
 # normas
 
-Repositório de normas marítimas e trabalhistas em formato original (PDF/DOCX) e em Markdown extraído.
+Repositório de normas técnicas em PDF com ferramenta de conversão para Markdown.
 
-## Estrutura
+## Converter PDFs em Markdown (para uso no GitHub Copilot Spaces)
 
-```
-normas/
-├── *.pdf / *.docx          # Documentos originais (raiz do repo)
-├── sources-md/             # Markdowns gerados por conversão (commitados)
-├── scripts/
-│   └── convert-sources.js  # Script de conversão
-├── package.json
-└── README.md
-```
-
-## Conversão PDF/DOCX → Markdown (Opção 1: texto contínuo)
-
-A conversão adota a **Opção 1**: gera um único arquivo `.md` por documento fonte,
-com **texto contínuo** (sem quebra por página).
+O GitHub Copilot Spaces não aceita arquivos `.pdf` como "Sources". Use a ferramenta deste repositório para gerar arquivos `.md` a partir dos PDFs.
 
 ### Pré-requisitos
 
-- Node.js ≥ 18
-- npm
+- [Node.js](https://nodejs.org/) v18 ou superior
 
 ### Instalação
 
@@ -30,44 +16,80 @@ com **texto contínuo** (sem quebra por página).
 npm install
 ```
 
-### Gerar os Markdowns
+### Compilar o script
 
 ```bash
-npm run convert:sources
+npm run build
 ```
 
-Este comando lê todos os `.pdf` e `.docx` na raiz do repositório e gera um `.md`
-correspondente em `sources-md/`.
+### Executar a conversão
 
-### Formato do `.md` gerado
+```bash
+npm run convert:pdf
+```
 
-Cada arquivo gerado contém:
+Os arquivos `.md` serão gerados na pasta `sources-md/`.
 
-1. **Cabeçalho de metadados** (front matter YAML):
-   - `source_file` — nome do arquivo original
-   - `source_path` — caminho relativo ao repo
-   - `generated_at` — timestamp ISO 8601
-   - `converter_version` — versão do script
-   - `limitations` — limitações conhecidas
+#### Opções avançadas
 
-2. **Título** (`# Nome do arquivo`)
+Você pode especificar a pasta de entrada e de saída:
 
-3. **Seção `## Texto extraído`** com o texto contínuo
+```bash
+node dist/convert.js <pasta-de-pdfs> <pasta-de-saida>
+```
 
-### Casos especiais
+Exemplos:
 
-| Situação | Comportamento |
-|---|---|
-| PDF com texto embutido | Texto extraído normalmente |
-| PDF digitalizado (scan) | Aviso `⚠️ OCR necessário` |
-| DOCX vazio ou protegido | Aviso `⚠️ DOCX vazio ou protegido` |
-| Erro de leitura | Aviso com mensagem de erro |
+```bash
+# Converter PDFs do diretório raiz para sources-md/ (padrão)
+node dist/convert.js . sources-md
 
-> **Nota**: Não há paginação no texto extraído (Opção 1). Formatação complexa
-> (tabelas, colunas múltiplas, imagens) pode não ser preservada.
+# Converter PDFs de uma subpasta
+node dist/convert.js pdf/ sources-md
+```
 
-## `sources-md/` no controle de versão
+### Estrutura de saída
 
-O diretório `sources-md/` **é commitado** no repositório para permitir que os
-Markdowns sejam consultados diretamente no GitHub sem necessidade de rodar o
-script localmente.
+Cada arquivo `.md` gerado contém:
+
+- **Metadados no cabeçalho** (frontmatter YAML):
+  - `source` — nome original do PDF
+  - `path` — caminho relativo do PDF
+  - `generated_at` — data e hora de geração
+  - `total_pages` — número de páginas
+- **Conteúdo por página** com marcador `## Página N`
+- **Aviso de OCR** caso o PDF seja escaneado/baseado em imagens
+
+Exemplo de saída:
+
+```markdown
+---
+source: Marpol_73_78_Anexos_I_V.pdf
+path: Marpol_73_78_Anexos_I_V.pdf
+generated_at: 2026-01-01 12:00:00 UTC
+total_pages: 75
+---
+
+# Marpol_73_78_Anexos_I_V.pdf
+
+## Página 1
+
+Convenção Internacional para a Prevenção da Poluição por Navios
+...
+```
+
+### Usar os arquivos `.md` no GitHub Copilot Spaces
+
+1. Execute a conversão localmente: `npm run build && npm run convert:pdf`
+2. Commit e faça push dos arquivos gerados em `sources-md/` (remova a linha `sources-md/` do `.gitignore` se quiser versioná-los)
+3. No GitHub Copilot Spaces, adicione o repositório como fonte e selecione os arquivos `.md` da pasta `sources-md/`
+
+### Logs e estatísticas
+
+A ferramenta exibe por arquivo:
+
+- `[OK]` — PDF convertido com sucesso (páginas e caracteres extraídos)
+- `[AVISO]` — PDF possivelmente escaneado, OCR necessário
+- `[ERRO]` — Falha ao processar (arquivo corrompido, protegido por senha, etc.)
+
+Ao final, um resumo com total de arquivos processados e gerados é exibido.

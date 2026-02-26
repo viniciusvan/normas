@@ -1,12 +1,27 @@
 {
   "name": "normas",
   "version": "1.0.0",
-  "description": "Repositório de normas marítimas — conversor PDF/DOCX para Markdown (Opção 1: texto contínuo por arquivo)",
+  "description": "Ferramentas para converter PDFs de normas em Markdown para uso no GitHub Copilot Spaces",
+  "main": "dist/convert.js",
   "scripts": {
-    "convert:sources": "node scripts/convert-sources.js"
+    "build": "tsc",
+    "convert:pdf": "node dist/convert.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/viniciusvan/normas.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/viniciusvan/normas/issues"
+  },
+  "homepage": "https://github.com/viniciusvan/normas#readme",
   "dependencies": {
-    "mammoth": "^1.8.0",
-    "pdf-parse": "^1.1.1"
+    "@types/node": "^25.3.2",
+    "pdf-parse": "^2.4.5",
+    "typescript": "^5.9.3"
   }
 }
