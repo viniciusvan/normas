@@ -1,16 +1,14 @@
 # normas
 
-Repositório de normas marítimas e trabalhistas em formato PDF e DOCX.
+Repositório de normas técnicas em PDF com ferramenta de conversão para Markdown.
 
-## Conversor de Normas para Markdown
+## Converter PDFs em Markdown (para uso no GitHub Copilot Spaces)
 
-Os arquivos PDF e DOCX podem ser convertidos para `.md` e utilizados como **Sources** no [GitHub Copilot Spaces](https://githubnext.com/projects/copilot-for-pull-requests/).
-
-> **Por quê?** O Copilot Spaces não suporta upload direto de PDFs. Convertendo para `.md`, você pode anexar os arquivos gerados em `sources-md/` diretamente no Copilot Spaces.
+O GitHub Copilot Spaces não aceita arquivos `.pdf` como "Sources". Use a ferramenta deste repositório para gerar arquivos `.md` a partir dos PDFs.
 
 ### Pré-requisitos
 
-- [Node.js](https://nodejs.org/) LTS (v18 ou superior)
+- [Node.js](https://nodejs.org/) v18 ou superior
 
 ### Instalação
 
@@ -18,54 +16,80 @@ Os arquivos PDF e DOCX podem ser convertidos para `.md` e utilizados como **Sour
 npm install
 ```
 
-### Como converter
-
-**Apenas arquivos na raiz do repositório (padrão):**
+### Compilar o script
 
 ```bash
-npm run convert:sources
+npm run build
 ```
 
-**Incluindo subpastas:**
+### Executar a conversão
 
 ```bash
-npm run convert:sources:recursive
+npm run convert:pdf
 ```
 
-Os arquivos `.md` gerados serão salvos em `sources-md/`.
+Os arquivos `.md` serão gerados na pasta `sources-md/`.
 
-### Resultado
+#### Opções avançadas
 
-Cada arquivo convertido recebe:
+Você pode especificar a pasta de entrada e de saída:
 
-- **Front matter** com metadados: nome original, caminho, data de geração e versão do conversor.
-- **Conteúdo textual** extraído do PDF ou DOCX.
-- **Aviso de OCR necessário** quando o texto extraído for insuficiente (PDFs escaneados/baseados em imagem).
+```bash
+node dist/convert.js <pasta-de-pdfs> <pasta-de-saida>
+```
 
-### Como usar no Copilot Spaces
+Exemplos:
 
-1. Execute `npm run convert:sources` para gerar os arquivos em `sources-md/`.
-2. No Copilot Spaces, clique em **Add source** → **File**.
-3. Selecione um ou mais arquivos `.md` de `sources-md/`.
-4. Use o Copilot para consultar o conteúdo das normas.
+```bash
+# Converter PDFs do diretório raiz para sources-md/ (padrão)
+node dist/convert.js . sources-md
 
-### Arquivos na raiz
+# Converter PDFs de uma subpasta
+node dist/convert.js pdf/ sources-md
+```
 
-| Arquivo | Tipo |
-|---------|------|
-| FSS_CODE_INTERNATIONAL_CODE_FOR_FIRE_SAFETY_SYSTEMES_2015_EDITION.pdf | PDF |
-| ILO C133 - Português.docx | DOCX |
-| IMO MLC 2006 (Inglês).pdf | PDF |
-| IMO Resolution A. 1116 (30) -ESCAPE ROUTE SIGNS AND EQUIPMENT LOCATION MARKINGS - 06-12-2017.pdf | PDF |
-| Marpol_73_78_Anexos_I_V.pdf | PDF |
-| NORMAM 201 (1).pdf | PDF |
-| NORMAM 201.pdf | PDF |
-| NR-37 (2022-1).pdf | PDF |
-| OSV CHEMICAL CODE.pdf | PDF |
-| Portaria MTP n.º 90 (Nova NR-37) II.pdf | PDF |
-| Resolution A.952(23) - GRAPHICAL SYMBOLS FOR SHIPBOARD FIRE CONTROL PLANS.pdf | PDF |
+### Estrutura de saída
 
-### Limitações
+Cada arquivo `.md` gerado contém:
 
-- A extração de PDFs é feita **sem OCR**. PDFs escaneados ou baseados em imagem terão pouco ou nenhum texto extraído — o arquivo `.md` gerado conterá um aviso claro.
-- Para PDFs escaneados, recomenda-se usar uma ferramenta de OCR externa antes de converter.
+- **Metadados no cabeçalho** (frontmatter YAML):
+  - `source` — nome original do PDF
+  - `path` — caminho relativo do PDF
+  - `generated_at` — data e hora de geração
+  - `total_pages` — número de páginas
+- **Conteúdo por página** com marcador `## Página N`
+- **Aviso de OCR** caso o PDF seja escaneado/baseado em imagens
+
+Exemplo de saída:
+
+```markdown
+---
+source: Marpol_73_78_Anexos_I_V.pdf
+path: Marpol_73_78_Anexos_I_V.pdf
+generated_at: 2026-01-01 12:00:00 UTC
+total_pages: 75
+---
+
+# Marpol_73_78_Anexos_I_V.pdf
+
+## Página 1
+
+Convenção Internacional para a Prevenção da Poluição por Navios
+...
+```
+
+### Usar os arquivos `.md` no GitHub Copilot Spaces
+
+1. Execute a conversão localmente: `npm run build && npm run convert:pdf`
+2. Commit e faça push dos arquivos gerados em `sources-md/` (remova a linha `sources-md/` do `.gitignore` se quiser versioná-los)
+3. No GitHub Copilot Spaces, adicione o repositório como fonte e selecione os arquivos `.md` da pasta `sources-md/`
+
+### Logs e estatísticas
+
+A ferramenta exibe por arquivo:
+
+- `[OK]` — PDF convertido com sucesso (páginas e caracteres extraídos)
+- `[AVISO]` — PDF possivelmente escaneado, OCR necessário
+- `[ERRO]` — Falha ao processar (arquivo corrompido, protegido por senha, etc.)
+
+Ao final, um resumo com total de arquivos processados e gerados é exibido.
