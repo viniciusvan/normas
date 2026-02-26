@@ -1,0 +1,12 @@
+{
+  "name": "normas",
+  "version": "1.0.0",
+  "description": "Repositório de normas marítimas — conversor PDF/DOCX para Markdown (Opção 1: texto contínuo por arquivo)",
+  "scripts": {
+    "convert:sources": "node scripts/convert-sources.js"
+  },
+  "dependencies": {
+    "mammoth": "^1.8.0",
+    "pdf-parse": "^1.1.1"
+  }
+}
